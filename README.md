@@ -1,1 +1,1 @@
-# osgi-war
+# osgi-web
