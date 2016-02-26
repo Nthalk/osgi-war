@@ -21,7 +21,7 @@ public class DataSourceService implements com.nthalk.osgi.web.core.api.DataSourc
     public DataSource getDataSource(String name) throws DataSourceUnavailableException {
         try {
             InitialContext initialContext = new InitialContext();
-            Object found = null;
+            Object found;
             try {
                 found = initialContext.lookup(name);
             } catch (NamingException e) {

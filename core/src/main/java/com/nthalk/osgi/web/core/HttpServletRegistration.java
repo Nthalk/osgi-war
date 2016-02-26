@@ -1,4 +1,4 @@
-package com.nthalk.osgi.web.plugin.example;
+package com.nthalk.osgi.web.core;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -16,33 +16,33 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 @Component(immediate = true)
-public class HttpServiceRegistration extends HttpServlet {
-    private static final Logger LOG = Logger.getLogger(HttpServiceRegistration.class);
+public class HttpServletRegistration extends HttpServlet {
+    private static final Logger LOG = Logger.getLogger(HttpServletRegistration.class);
+
+    private static final String PATH = "/";
 
     @Reference
     HttpService httpService;
 
     @Activate
-    protected void activate() {
+    public void activate() {
         try {
-            httpService.registerServlet("/yay", this, null, null);
+            httpService.registerServlet(PATH, this, null, null);
         } catch (ServletException | NamespaceException e) {
             LOG.error("Could not register servlet", e);
         }
     }
 
     @Deactivate
-    protected void deactivate() {
-        httpService.unregister("/yay");
+    public void deactivate() {
+        httpService.unregister(PATH);
     }
-
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res)
-        throws ServletException, IOException {
-        res.setContentType("text/plain");
-        PrintWriter out = res.getWriter();
-        out.println("Plugin: " + req.getPathInfo());
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType("text/plain");
+        PrintWriter out = resp.getWriter();
+        out.println("Core: " + req.getPathInfo());
     }
-
 }
