@@ -1,5 +1,6 @@
 package com.nthalk.osgi.web.plugin.example;
 
+import org.apache.felix.http.api.ExtHttpService;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -18,14 +19,15 @@ import java.io.PrintWriter;
 @Component(immediate = true)
 public class HttpServiceRegistration extends HttpServlet {
     private static final Logger LOG = Logger.getLogger(HttpServiceRegistration.class);
+    private static final String PATH = "/plugin";
 
     @Reference
-    HttpService httpService;
+    ExtHttpService httpService;
 
     @Activate
     protected void activate() {
         try {
-            httpService.registerServlet("/yay", this, null, null);
+            httpService.registerServlet(PATH, this, null, null);
         } catch (ServletException | NamespaceException e) {
             LOG.error("Could not register servlet", e);
         }
@@ -33,9 +35,8 @@ public class HttpServiceRegistration extends HttpServlet {
 
     @Deactivate
     protected void deactivate() {
-        httpService.unregister("/yay");
+        httpService.unregister(PATH);
     }
-
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
