@@ -5,7 +5,9 @@ import org.apache.felix.fileinstall.internal.DirectoryWatcher;
 import org.apache.felix.framework.Felix;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 import javax.servlet.ServletContext;
@@ -16,8 +18,25 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class Platform implements ServletContextListener {
+
+    private class Installer {
+
+        private final BundleContext bundleContext;
+        private final ServletContext servletContext;
+
+        Installer(BundleContext bundleContext, ServletContext servletContext) {
+            this.bundleContext = bundleContext;
+            this.servletContext = servletContext;
+        }
+
+        void installWarLib(String warLibBundle) throws BundleException {
+            bundleContext.installBundle("file:" + servletContext.getRealPath("WEB-INF/lib/" + warLibBundle)).start();
+        }
+    }
+
     private static final Logger LOG = Logger.getLogger(Platform.class);
-    Felix felix;
+    private Felix felix;
+
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -36,7 +55,10 @@ public class Platform implements ServletContextListener {
         }
 
         setupPlatformDirectories(homePath, properties);
-        properties.setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "org.apache.log4j;version=" + properties.getProperty("log4j.version"));
+        properties.setProperty(
+            Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA,
+            "org.apache.log4j;version=" + properties.getProperty("log4j.version") +
+                ",javax.servlet;javax.servlet.http;version=3.0.1");
         properties.putAll(systemProperties);
 
 
@@ -47,8 +69,10 @@ public class Platform implements ServletContextListener {
             LOG.info("Initializing...");
             felix.init();
 
+
             // Add listener
             BundleContext bundleContext = felix.getBundleContext();
+            Installer installer = new Installer(bundleContext, servletContext);
             bundleContext.addBundleListener(new BundleEventListener());
 
             felix.start();
@@ -56,23 +80,30 @@ public class Platform implements ServletContextListener {
             LOG.info("Loading platform bundles...");
 
             // Compendium
-            bundleContext.installBundle("file:" + servletContext.getRealPath("WEB-INF/lib/org.osgi.compendium-1.4.0.jar")).start();
-
+            installer.installWarLib("org.osgi.compendium-1.4.0.jar");
             // SCR Runtime
-            bundleContext.installBundle("file:" + servletContext.getRealPath("WEB-INF/lib/org.apache.felix.scr-2.0.2.jar")).start();
+            installer.installWarLib("org.apache.felix.scr-2.0.2.jar");
 
             // Core bundle
-            bundleContext.installBundle("file:" + servletContext.getRealPath("WEB-INF/lib/core-" + properties.getProperty("version") + ".jar")).start();
+            installer.installWarLib("core-" + properties.getProperty("version") + ".jar");
             // Plugin Example
-            bundleContext.installBundle("file:" + servletContext.getRealPath("WEB-INF/lib/plugin-example-" + properties.getProperty("version") + ".jar")).start();
+            installer.installWarLib("plugin-example-" + properties.getProperty("version") + ".jar");
+
+            // Http Servlet bridge
+            installer.installWarLib("org.apache.felix.http.api-2.2.2.jar");
+            installer.installWarLib("org.apache.felix.http.bridge-2.2.2.jar");
+
+            // Http Servlet proxy setup
+            servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
 
             // Install fileinstall for hotloading plugins
-            bundleContext.installBundle("file:" + servletContext.getRealPath("WEB-INF/lib/org.apache.felix.fileinstall-3.5.2.jar")).start();
+            installer.installWarLib("org.apache.felix.fileinstall-3.5.2.jar");
 
         } catch (Exception ex) {
             LOG.error("Could not create framework", ex);
         }
     }
+
 
     private void validateHomePath(String homePath) {
         if (homePath == null) {
@@ -97,14 +128,16 @@ public class Platform implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         try {
             System.out.println("Shutting down...");
-            felix.stop();
-            felix.waitForStop(30000);
+            if (felix.getState() == Bundle.ACTIVE) {
+                felix.stop();
+                felix.waitForStop(30000);
+            }
         } catch (Exception e) {
             LOG.error("Could not shutdown", e);
         }
     }
 
-    public void setupPlatformDirectories(String homePath, Properties properties) {
+    private void setupPlatformDirectories(String homePath, Properties properties) {
         properties.setProperty(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
         properties.setProperty(Constants.FRAMEWORK_STORAGE, homePath + "/cache");
         properties.setProperty(DirectoryWatcher.DIR, homePath + "/modules");

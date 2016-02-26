@@ -6,4 +6,20 @@
     <listener>
         <listener-class>com.nthalk.osgi.web.platform.Platform</listener-class>
     </listener>
+
+    <listener>
+        <listener-class>org.apache.felix.http.proxy.ProxyListener</listener-class>
+    </listener>
+
+    <servlet>
+        <servlet-name>proxy</servlet-name>
+        <servlet-class>org.apache.felix.http.proxy.ProxyServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>proxy</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
 </web-app>
