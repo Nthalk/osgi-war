@@ -84,17 +84,17 @@ public class Platform implements ServletContextListener {
             // SCR Runtime
             installer.installWarLib("org.apache.felix.scr-2.0.2.jar");
 
-            // Core bundle
-            installer.installWarLib("core-" + properties.getProperty("version") + ".jar");
-            // Plugin Example
-            installer.installWarLib("plugin-example-" + properties.getProperty("version") + ".jar");
-
             // Http Servlet bridge
             installer.installWarLib("org.apache.felix.http.api-2.2.2.jar");
             installer.installWarLib("org.apache.felix.http.bridge-2.2.2.jar");
 
             // Http Servlet proxy setup
             servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
+
+            // Core bundle
+            installer.installWarLib("core-" + properties.getProperty("version") + ".jar");
+            // Plugin Example
+            installer.installWarLib("plugin-example-" + properties.getProperty("version") + ".jar");
 
             // Install fileinstall for hotloading plugins
             installer.installWarLib("org.apache.felix.fileinstall-3.5.2.jar");
