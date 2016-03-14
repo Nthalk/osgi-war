@@ -46,6 +46,6 @@ public class BundleEventListener implements BundleListener {
                 typeName = "Unknown " + type;
         }
 
-        LOG.info("Changed: " + typeName + " " + bundleEvent.getBundle().getSymbolicName());
+        LOG.info(typeName + ": " + bundleEvent.getBundle().getSymbolicName());
     }
 }

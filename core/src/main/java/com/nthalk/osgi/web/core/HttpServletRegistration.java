@@ -1,9 +1,6 @@
 package com.nthalk.osgi.web.core;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.*;
 import org.apache.log4j.Logger;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -15,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@Component(immediate = true)
+@Component
 public class HttpServletRegistration extends HttpServlet {
     private static final Logger LOG = Logger.getLogger(HttpServletRegistration.class);
 
@@ -27,6 +24,7 @@ public class HttpServletRegistration extends HttpServlet {
     @Activate
     public void activate() {
         try {
+            LOG.info("Registering servlet under " + PATH);
             httpService.registerServlet(PATH, this, null, null);
         } catch (ServletException | NamespaceException e) {
             LOG.error("Could not register servlet", e);
@@ -35,6 +33,7 @@ public class HttpServletRegistration extends HttpServlet {
 
     @Deactivate
     public void deactivate() {
+        LOG.info("Unregistering servlet");
         httpService.unregister(PATH);
     }
 

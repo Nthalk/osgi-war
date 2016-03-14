@@ -19,24 +19,8 @@ import java.util.Properties;
 
 public class Platform implements ServletContextListener {
 
-    private class Installer {
-
-        private final BundleContext bundleContext;
-        private final ServletContext servletContext;
-
-        Installer(BundleContext bundleContext, ServletContext servletContext) {
-            this.bundleContext = bundleContext;
-            this.servletContext = servletContext;
-        }
-
-        void installWarLib(String warLibBundle) throws BundleException {
-            bundleContext.installBundle("file:" + servletContext.getRealPath("WEB-INF/lib/" + warLibBundle)).start();
-        }
-    }
-
     private static final Logger LOG = Logger.getLogger(Platform.class);
     private Felix felix;
-
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -79,17 +63,28 @@ public class Platform implements ServletContextListener {
 
             LOG.info("Loading platform bundles...");
 
+            // Http Servlet proxy setup
+            servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
+
+            // Logging
+            installer.installWarLib("org.apache.felix.log-1.0.1.jar");
+
             // Compendium
             installer.installWarLib("org.osgi.compendium-1.4.0.jar");
-            // SCR Runtime
-            installer.installWarLib("org.apache.felix.scr-2.0.2.jar");
 
             // Http Servlet bridge
             installer.installWarLib("org.apache.felix.http.api-2.2.2.jar");
             installer.installWarLib("org.apache.felix.http.bridge-2.2.2.jar");
 
-            // Http Servlet proxy setup
-            servletContext.setAttribute("org.osgi.framework.BundleContext", bundleContext);
+            // SCR Runtime
+            installer.installWarLib("org.apache.felix.scr-2.0.2.jar");
+
+            // WebConsole
+            installer.installWarLib("json-20160212.jar");
+            installer.installWarLib("commons-io-2.4.jar");
+            installer.installWarLib("portlet-api-2.0.jar");
+            installer.installWarLib("org.apache.commons.fileupload-1.2.2.LIFERAY-PATCHED-1.jar");
+            installer.installWarLib("org.apache.felix.webconsole-4.2.14.jar");
 
             // Core bundle
             installer.installWarLib("core-" + properties.getProperty("version") + ".jar");
@@ -103,7 +98,6 @@ public class Platform implements ServletContextListener {
             LOG.error("Could not create framework", ex);
         }
     }
-
 
     private void validateHomePath(String homePath) {
         if (homePath == null) {
@@ -146,5 +140,20 @@ public class Platform implements ServletContextListener {
         } catch (IOException ignored) {
         }
         properties.setProperty("felix.cm.dir", homePath + "/config");
+    }
+
+    private class Installer {
+
+        private final BundleContext bundleContext;
+        private final ServletContext servletContext;
+
+        Installer(BundleContext bundleContext, ServletContext servletContext) {
+            this.bundleContext = bundleContext;
+            this.servletContext = servletContext;
+        }
+
+        void installWarLib(String warLibBundle) throws BundleException {
+            bundleContext.installBundle("file:" + servletContext.getRealPath("WEB-INF/lib/" + warLibBundle)).start();
+        }
     }
 }
