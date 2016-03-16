@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.nthalk.osgi.web.platform</groupId>
@@ -11,10 +9,22 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>home</module>
         <module>core</module>
         <module>plugin-example</module>
         <module>platform</module>
     </modules>
+
+    <properties>
+        <log4j.version>1.2.17</log4j.version>
+        <platform-exports>
+            org.apache.log4j;version=${log4j.version},
+            javax.servlet;javax.servlet.http;version=3.0.1,
+            org.xml.sax,
+            javax.xml.parsers,
+            org.w3c.dom
+        </platform-exports>
+    </properties>
 
     <build>
         <plugins>

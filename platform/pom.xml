@@ -9,7 +9,7 @@
     </parent>
 
     <properties>
-        <log4j.version>1.2.17</log4j.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <artifactId>platform</artifactId>
@@ -51,6 +51,11 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware.yamlbeans</groupId>
+            <artifactId>yamlbeans</artifactId>
+            <version>1.09</version>
         </dependency>
 
         <dependency>
@@ -135,6 +140,7 @@
             <version>2.2.2</version>
         </dependency>
 
+        <!-- Home grown modules -->
         <dependency>
             <groupId>com.nthalk.osgi.web.platform</groupId>
             <artifactId>core</artifactId>

@@ -1,5 +1,7 @@
 package com.nthalk.osgi.web.platform;
 
+import com.esotericsoftware.yamlbeans.YamlException;
+import com.esotericsoftware.yamlbeans.YamlReader;
 import org.apache.commons.io.FileUtils;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
 import org.apache.felix.framework.Felix;
@@ -15,6 +17,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 public class Platform implements ServletContextListener {
@@ -29,8 +32,14 @@ public class Platform implements ServletContextListener {
         String homePath = systemProperties.getProperty("home");
         configureLogging(homePath);
         validateHomePath(homePath);
-
         Properties properties = new Properties();
+
+        Config config;
+        try {
+            config = new YamlReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("platform.yml"))).read(Config.class);
+        } catch (YamlException e) {
+            throw new RuntimeException("Could not load platform.yml", e);
+        }
 
         try {
             properties.load(getClass().getClassLoader().getResourceAsStream("version.properties"));
@@ -39,10 +48,7 @@ public class Platform implements ServletContextListener {
         }
 
         setupPlatformDirectories(homePath, properties);
-        properties.setProperty(
-            Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA,
-            "org.apache.log4j;version=" + properties.getProperty("log4j.version") +
-                ",javax.servlet;javax.servlet.http;version=3.0.1");
+        properties.setProperty(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, config.platformExports.replaceAll("\\s+", ""));
         properties.putAll(systemProperties);
 
 

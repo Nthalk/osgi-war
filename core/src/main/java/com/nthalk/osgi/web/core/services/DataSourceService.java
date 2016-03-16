@@ -10,9 +10,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-@Component(
-    label = "DataSource Service",
-    description = "Get DataSources")
+@Component
 @Service
 public class DataSourceService implements com.nthalk.osgi.web.core.api.DataSourceService {
     private static final Logger LOG = Logger.getLogger(DataSourceService.class);

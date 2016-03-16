@@ -5,9 +5,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.log4j.Logger;
 
-@Component(
-    label = "Plugin Service",
-    description = "Information about plugins")
+@Component
 @Service
 public class PluginService implements com.nthalk.osgi.web.core.api.PluginService {
     private static final Logger LOG = Logger.getLogger(PluginService.class);
